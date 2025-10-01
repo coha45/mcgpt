@@ -1,28 +1,40 @@
 import { createContext, useState } from 'react'
+import { getGroqChatCompletion } from '../http'
 
 export const chatsContext = createContext({
     curChat : null,
     chats : [],
     setCurChat : () => {},
-    createNewChat : () => {},
+    createNewChat : async () => {},
     deleteChat : () => {},
     getChat : () => {},
-    newMessage : () => {}
+    newMessage : async () => {}
 })
 
 const ChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([])
   const [curChat, setCurChat] = useState(null)
-
-  const createNewChat = (initialMsg) => {
-    const newChat = {
-        id : Math.random().toString(36).substring(2),
-        title : Math.random().toString(10).substring(2),
-        messages : [{
-          role : "user",
-          message : initialMsg
-        }]
+  
+  const createNewChat = async (initialMsg) => {
+    const chat = {
+      role : "user",
+      content : initialMsg
     }
+
+    const initialResponse = await getGroqChatCompletion([chat])
+    const newChat = {
+      id : Math.random().toString(36).substring(2),
+      title : Math.random().toString(10).substring(2),
+      messages : [chat, {
+          role : "system",
+          content : `You are an adventurer named 'Steve' set in the world of minecraft. You should know that the user speaks in the contexts of a minecraft world." + 
+            Your responses should be bubbly and short. When adding flare to your responses use default HTML tags! Also when rendering lists use the <ul> or <ol> depending on the use case
+            also please <br>'s to separate logical items`
+            
+          
+        }, initialResponse.data.choices[0].message]
+    }
+
     setCurChat(newChat.id)
     setChats(prevChats => [newChat, ...prevChats])
     return newChat.id
@@ -36,11 +48,11 @@ const ChatsProvider = ({ children }) => {
     return chats.find(chat => chat.id === curChat)
   }
 
-  const newMessage = (role, message) => {
+  const newMessage = (role, content) => {
     setChats(prevChats => 
-        prevChats.map(chat => 
-            chat.id === curChat ?
-            { ...chat, messages : [...chat.messages, { role, message }] } :
+      prevChats.map(chat => 
+        chat.id === curChat ?
+        { ...chat, messages : [...chat.messages, { role, content }]} :
             chat
         )
     )

@@ -1,25 +1,35 @@
-import { useEffect, useRef, useContext } from "react"
+import { useEffect, useRef, useContext, useState } from "react"
 import Button from "./Button"
 import { BiImageAdd } from "react-icons/bi"
 import { FaMicrophone } from "react-icons/fa"
 import { IoMdSend } from "react-icons/io"
 import { chatsContext } from "../../context/chatsContext"
+import { getGroqChatCompletion } from "../../http"
 
 
 const ChatInput = () => {
+  const [loading, isLoading] = useState(false)
   const ctx = useContext(chatsContext)
   const inputRef = useRef()
 
-  function onSubmit() {
+  async function onSubmit() {
     const value = inputRef.current.value
     if (!value) return
 
     if (!ctx.curChat) {
-        console.log(ctx.curChat)
-        ctx.createNewChat(value)
-      } else {
-        console.log("Supasdasd")
-        ctx.newMessage("user", value)
+      await ctx.createNewChat(value)
+    } else {
+      const updatedMessages = [
+        ...ctx.getChat().messages,
+        {
+          role : "user" ,
+          content : value
+        },
+      ]
+      ctx.newMessage("user", value)
+      const response = await getGroqChatCompletion(updatedMessages)
+      console.log(response)
+      ctx.newMessage("assistant", response.data.choices[0].message.content)
     }
     inputRef.current.value = ""
   }
