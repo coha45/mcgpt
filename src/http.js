@@ -17,3 +17,14 @@ export const getGroqChatCompletion = async (messages) => {
 
   return data
 }
+
+export const getNewTitle = async (messages) => {
+  const data = await getGroqChatCompletion([
+    ...messages,
+    {
+      role : "system",
+      content : "Create a simple title for this chat based on the previous messages."
+    }
+  ])
+  return data
+}

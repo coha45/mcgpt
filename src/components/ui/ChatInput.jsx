@@ -8,16 +8,18 @@ import { getGroqChatCompletion } from "../../http"
 
 
 const ChatInput = () => {
-  const [loading, isLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const ctx = useContext(chatsContext)
   const inputRef = useRef()
 
   async function onSubmit() {
+    if (isLoading) return
     const value = inputRef.current.value
     if (!value) return
 
     if (!ctx.curChat) {
       await ctx.createNewChat(value)
+      inputRef.current.value = ""
     } else {
       const updatedMessages = [
         ...ctx.getChat().messages,
@@ -27,11 +29,12 @@ const ChatInput = () => {
         },
       ]
       ctx.newMessage("user", value)
+      inputRef.current.value = ""
+      setIsLoading(true)
       const response = await getGroqChatCompletion(updatedMessages)
-      console.log(response)
+      setIsLoading(false)
       ctx.newMessage("assistant", response.data.choices[0].message.content)
     }
-    inputRef.current.value = ""
   }
 
   useEffect(() => {
@@ -56,7 +59,7 @@ const ChatInput = () => {
         <Button>
             <FaMicrophone />
         </Button>
-        <Button onClick={onSubmit}>
+        <Button onClick={onSubmit} disabled={isLoading}>
             <IoMdSend />
         </Button>
     </span>
