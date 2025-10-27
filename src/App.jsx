@@ -4,7 +4,7 @@ import Main from './components/Main'
 
 const App = () => {
   return (
-    <div className="bg-neutral-100 flex">
+    <div className="bg-neutral-100 flex font-mc-regular">
       <Sidebar />
       <Main />
     </div>

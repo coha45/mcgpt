@@ -1,1 +1,23 @@
 @import "tailwindcss";
+::-webkit-scrollbar {
+    display: none;
+}
+
+@font-face {
+    font-family: "Minecraft Regular";
+    src: url("/src/assets/fonts/MinecraftRegular.otf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Minecraft Ten";
+    src: url("/src/assets/fonts/MinecraftTen.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@theme {
+    --font-mc-regular: "Minecraft Regular", sans-serif;
+    --font-mc-ten : "Minecraft Ten", sans-serif;
+}

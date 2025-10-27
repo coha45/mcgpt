@@ -1,9 +1,11 @@
 import { createContext, useState } from 'react'
-import { getGroqChatCompletion } from '../http'
+import { getGroqChatCompletion, getNewTitle } from '../http'
 
 export const chatsContext = createContext({
     curChat : null,
     chats : [],
+    isLoading : null,
+    setIsLoading : () => {}, 
     setCurChat : () => {},
     createNewChat : async () => {},
     deleteChat : () => {},
@@ -14,46 +16,64 @@ export const chatsContext = createContext({
 const ChatsProvider = ({ children }) => {
   const [chats, setChats] = useState([])
   const [curChat, setCurChat] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   
   const createNewChat = async (initialMsg) => {
     const chat = {
       role : "user",
       content : initialMsg
     }
-
+  
     const newChat = {
       id : Math.random().toString(36).substring(2),
-      title : Math.random().toString(10).substring(2),
+      title : "New Chat",
       messages : [chat, {
-          role : "system",
-          content : `You as the assistant are an adventurer named 'Steve' set in the world of minecraft. You should know that the user speaks in the contexts of a minecraft world." + 
-            Your responses should be bubbly and short. When adding flare to your responses use default HTML tags! Also when rendering lists use the <ul> or <ol> depending on the use case
-            also please <br>'s to separate logical items`
-        }]
+        role : "system",
+        content : `You as the assistant are an adventurer named 'Steve' set in the world of minecraft. You should know that the user speaks in the contexts of a minecraft world." + 
+        Your responses should be bubbly and short. When adding flare to your responses use default HTML tags! Also when rendering lists use the <ul> or <ol> depending on the use case
+        also please <br>'s to separate logical items`
+      }]
     }
     setChats(prevChats => [newChat, ...prevChats])
     setCurChat(newChat.id)
+
+    // response
     const initialResponse = await getGroqChatCompletion([chat])
-    newMessage("assistant", initialResponse.data.choices[0].message.content, newChat.id)
-    return newChat.id
+
+    if (!initialResponse.success) return { success : false, message : "An error occured!" }
+
+    newMessage("assistant", initialResponse.content, newChat.id)
+
+    return { success : true }
   }
 
   const deleteChat = () => {
     setChats(prevChats => prevChats.filter(chat => chat.id !== curChat))
+    setCurChat(null)
   }
 
-  const getChat = () => {
-    return chats.find(chat => chat.id === curChat)
+  const getChat = (id) => {
+    return chats.find(chat => chat.id === curChat || id)
+  }
+
+  const setChatTitle = async (id, messages) => {
+    getNewTitle(messages).then(data => {
+      console.log(data)
+      setChats(prevChats => 
+        prevChats.map(chat => 
+          chat.id === (id || curChat) ?
+          { ...chat, title : response.content } :
+              chat
+      ))
+    }).catch(err => console.log("ERROR UHH: ", err))
   }
 
   const newMessage = (role, content, id) => {
-    setChats(prevChats => 
-      prevChats.map(chat => 
+    setChats(prevChats => prevChats.map(chat => 
         chat.id === (id || curChat) ?
         { ...chat, messages : [...chat.messages, { role, content }]} :
             chat
-        )
-    )
+    ))
   }
   
   const ctxValue = {
@@ -63,7 +83,9 @@ const ChatsProvider = ({ children }) => {
     createNewChat,
     deleteChat,
     getChat,
-    newMessage
+    newMessage,
+    isLoading,
+    setIsLoading
   }
 
   return (
