@@ -31,9 +31,13 @@ const ChatInput = () => {
       inputRef.current.value = ""
       
       setIsLoading(true)
-      const err = await createNewChat(value)
+      const newChat = await createNewChat(value)
       setIsLoading(false)
-      playNpc() 
+
+      if (newChat.success) {
+        playNpc()
+      }
+       
     } else {
       const updatedMessages = [
         ...ctx.getChat().messages,
@@ -55,31 +59,34 @@ const ChatInput = () => {
     }
     }, [ctx, isLoading])
     
+
     useEffect(() => {
       const onEnter = e => {
         if (e.keyCode === 13 && document.activeElement === inputRef.current) {
           onSubmit()
         }
-    }
-    document.addEventListener("keydown", onEnter)
-    return () => { 
-        document.removeEventListener("keydown", onEnter)
-    }
+      }
+      document.addEventListener("keydown", onEnter)
+      return () => { 
+          document.removeEventListener("keydown", onEnter)
+      }
   }, [onSubmit])
 
 
   return (
-    <span className="w-full bg-slate-200 px-10 py-2 flex justify-between items-center border-2 border-black">
-        <input ref={inputRef} className="flex-1 focus:outline-none text-lg font-semibold" placeholder="Enter prompt here"/>
-        <Button icon>
-            <MinecraftPainting />
-        </Button>
-        <Button icon>
-            <FaMicrophone />
-        </Button>
-        <Button icon onClick={onSubmit} disabled={isLoading}>
-            <IoMdSend />
-        </Button>
+    <span className="w-full bg-slate-200 max-[400px]:px-5 max-[400px]:py-2 px-10 py-2 flex justify-between items-center border-2 border-black">
+        <input ref={inputRef} className="w-4/5 focus:outline-none font-semibold" placeholder="Enter prompt here"/>
+        <ul className="flex flex-row">
+          <Button icon>
+              <i class="hn hn-image"></i>
+          </Button>
+          <Button icon>
+              <i class="hn hn-podcasts"></i>
+          </Button>
+          <Button icon onClick={onSubmit} disabled={isLoading}>
+              <IoMdSend />
+          </Button>
+        </ul>
     </span>
   )
 }

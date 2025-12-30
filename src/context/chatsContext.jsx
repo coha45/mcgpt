@@ -23,7 +23,6 @@ const ChatsProvider = ({ children }) => {
       role : "user",
       content : initialMsg
     }
-  
     const newChat = {
       id : Math.random().toString(36).substring(2),
       title : "New Chat",
@@ -39,7 +38,6 @@ const ChatsProvider = ({ children }) => {
 
     // response
     const initialResponse = await getGroqChatCompletion([chat])
-
     if (!initialResponse.success) return { success : false, message : "An error occured!" }
 
     newMessage("assistant", initialResponse.content, newChat.id)

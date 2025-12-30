@@ -5,18 +5,20 @@ import { chatsContext } from '../context/chatsContext'
 const Chats = ({ messages }) => {
   const ctx = useContext(chatsContext)
   return (
-    <ul className="flex flex-col items-center w-full gap-2 max-h-2xl overflow-y-scroll">
-        {
-            messages.map((msg, index) => (
-                <ChatMessage key={index} msg={msg} />
-              )) 
-            }
-        {
-            ctx.isLoading && <li className="max-w-full px-4 py-2 break-words self-start text-3xl">
-              ...
-            </li>
-        }
-    </ul>
+    <div className="w-full overflow-scroll">
+      <ul className="flex flex-col items-center w-full gap-2 flex-1 max-md:text-sm">
+          {
+              messages.map((msg, index) => (
+                  <ChatMessage key={index} msg={msg} />
+                )) 
+              }
+          {
+              ctx.isLoading && <li className="max-w-full px-4 py-2 self-start text-3xl">
+                ...
+              </li>
+          }
+      </ul>
+    </div>
   )
 }
 
